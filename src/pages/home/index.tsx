@@ -1,40 +1,46 @@
-import React, { useState, FormEvent } from 'react';
-import { FiChevronRight } from 'react-icons/fi'
+import React, { useState, FormEvent, useEffect } from "react";
+import { FiChevronRight } from "react-icons/fi";
 
-import { toast } from 'react-toastify';
+import { toast } from "react-toastify";
 
-import api from '../../services/api'
+import api from "../../services/api";
 
-import Logo from '../../img/logo-github.svg';
+import Logo from "../../img/logo-github.svg";
 
-import { Title, Form, Repositories } from './style';
+import { Title, Form, Repositories } from "./style";
 
 interface Repository {
-  full_name: string,
-  description: string,
+  full_name: string;
+  description: string;
   owner: {
-    login: string,
-    avatar_url: string
-  }
-
+    login: string;
+    avatar_url: string;
+  };
 }
 
 const Home: React.FC = () => {
-  const [ newRepo, setNewRepo ] = useState('')
-  const [ repositories, setRepositories ] = useState<Repository[]>([])
+  const [newRepo, setNewRepo] = useState("");
+  const [repositories, setRepositories] = useState<Repository[]>(() => {
+    const reposStorage = localStorage.getItem("@repos");
+    if (reposStorage) return JSON.parse(reposStorage);
+    return [];
+  });
 
-  async function handleAddRepository(event: FormEvent<HTMLFormElement>){
-    event.preventDefault();
+  useEffect(() => {
+    localStorage.setItem("@repos", JSON.stringify(repositories));
+  }, [repositories]);
+
+  async function handleAddRepository(e: FormEvent<HTMLFormElement>) {
+    e.preventDefault();
     try {
       // add novos repositorios
-      const response = await api.get(`repos/${newRepo}`)
-      const repository = response.data
-      console.log(repositories)
-      setRepositories([...repositories, repository])
-      setNewRepo('')
-      toast.success('Diretório adicionado com sucesso!!!');
-    } catch (e){
-      return toast.error('Oops algo deu errado')
+      const response = await api.get(`repos/${newRepo}`);
+      const repository = response.data;
+      setRepositories([...repositories, repository]);
+      setNewRepo("");
+      toast.success("Diretório adicionado com sucesso!!!");
+    } catch (e) {
+      return toast.error("Oops algo deu errado");
     }
   }
   return (
@@ -42,31 +48,28 @@ const Home: React.FC = () => {
       <img src={Logo} alt="Logo App" />
       <Title>Encontre repositórios no GitHub</Title>
       <Form onSubmit={handleAddRepository}>
-        <input 
+        <input
           value={newRepo}
-          onChange={ e => setNewRepo(e.target.value)}
+          onChange={(e) => setNewRepo(e.target.value)}
           type="text"
           placeholder="Digite o nome do repositório"
         />
-        <button type="submit" > Pesquisar </button>
+        <button type="submit"> Pesquisar </button>
       </Form>
       <Repositories>
-        { repositories.map( (repo, index) => (
+        {repositories.map((repo, index) => (
           <a key={index} href="repo">
-            <img 
-              src={repo.owner.avatar_url}
-              alt={repo.owner.login}
-            />
+            <img src={repo.owner.avatar_url} alt={repo.owner.login} />
             <div>
               <strong>{repo.full_name}</strong>
               <p>{repo.description}</p>
             </div>
-            <FiChevronRight size={40}/>
+            <FiChevronRight size={40} />
           </a>
-        )) }
+        ))}
       </Repositories>
-    </>      
+    </>
   );
-}
+};
 
 export default Home;
