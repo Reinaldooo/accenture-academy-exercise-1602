@@ -51,7 +51,7 @@ const Home: React.FC = () => {
           value={newRepo}
           onChange={(e) => setNewRepo(e.target.value)}
           type="text"
-          placeholder="Digite o nome do repositório"
+          placeholder="Nome do repo, ex: facebook/react"
         />
         <button type="submit"> Pesquisar </button>
       </Form>
